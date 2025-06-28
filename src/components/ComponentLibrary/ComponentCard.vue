@@ -1,27 +1,45 @@
 <script lang="ts" setup>
 import { Card } from "primevue";
-import type { ComponentDefinition } from "./components";
+import type { ComponentDefinition, MiniComponentMetadata } from "./components";
+import { onMounted, ref, useTemplateRef, watch } from "vue";
 
 const props = defineProps<{
-    componentItem: ComponentDefinition;
+  componentItem: ComponentDefinition;
 }>();
+
+const componentRef = useTemplateRef<HTMLDivElement>("componentRef");
+
+
+function onDragStart(event: DragEvent) {
+  event.dataTransfer?.setData(
+    "MiniComponentMetadata",
+    JSON.stringify({
+      type: props.componentItem.type,
+      version: props.componentItem.version,
+    } as MiniComponentMetadata)
+  );
+  event.dataTransfer!.effectAllowed = "copy";
+}
 </script>
 
 <template>
+  <div ref="componentRef" @dragstart="onDragStart" draggable="true">
     <Card class="component-item">
-        <template #content>
-              <div class="component-content">
-                <span class="component-icon">{{ props.componentItem.icon }}</span>
-                <div class="component-details">
-                  <span class="component-name">{{ props.componentItem.name }}</span>
-                  <span class="component-description">{{ props.componentItem.description }}</span>
-                </div>
-              </div>
-            </template>
+      <template #content>
+        <div class="component-content">
+          <span class="component-icon">{{ props.componentItem.icon }}</span>
+          <div class="component-details">
+            <span class="component-name">{{ props.componentItem.name }}</span>
+            <span class="component-description">{{
+              props.componentItem.description
+            }}</span>
+          </div>
+        </div>
+      </template>
     </Card>
+  </div>
 </template>
 <style scoped>
-
 .component-item {
   cursor: pointer;
   transition: all 0.2s ease;

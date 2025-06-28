@@ -1,6 +1,5 @@
 export type ComponentConfigField<TName, TValueType> = {
   type: TName;
-  defaultValue?: TValueType;
   label?: string;
   nullable?: boolean;
 };
@@ -23,6 +22,11 @@ export type Component = {
     children?: Component[];
 }
 
+export type MiniComponentMetadata = {
+  type: string;
+  version: string;
+};
+
 
 export type ComponentDefinition = {
   name: string;
@@ -30,6 +34,7 @@ export type ComponentDefinition = {
   type: string;
   icon: string;
   version: string;
+  allowsChildren?: boolean;
   defaultConfig?: Record<string, any>;
   configFields: {
     [key: string]:
@@ -63,14 +68,41 @@ export const ALL_COMPONENTS: ComponentDefinition[] = [
     configFields: {
       text: {
         type: "select",
-        defaultValue: "Hello World",
         label: "Text",
         nullable: false,
         options: [],
       },
     },
     defaultConfig: {
-        text: "Hello World",
+        text: "Hello World1",
+    }
+  },
+  {
+    name: "Container",
+    description: "A container component that can hold other components",
+    type: "container",
+    icon: "📦",
+    version: "1.0.0",
+    configFields: {},
+    defaultConfig: {},
+    allowsChildren: true
+  },
+  {
+    name: "Text",
+    description: "A simple text component",
+    type: "text",
+    icon: "📝",
+    version: "2.0.0",
+    configFields: {
+      text: {
+        type: "select",
+        label: "Text",
+        nullable: false,
+        options: [],
+      },
+    },
+    defaultConfig: {
+        text: "Hello World2",
     }
   },
   {
@@ -78,18 +110,17 @@ export const ALL_COMPONENTS: ComponentDefinition[] = [
     description: "A simple text component",
     type: "text",
     icon: "📝",
-    version: "1.0.0",
+    version: "3.0.0",
     configFields: {
       text: {
         type: "select",
-        defaultValue: "Hello World",
         label: "Text",
         nullable: false,
         options: [],
       },
     },
     defaultConfig: {
-        text: "Hello World",
+        text: "Hello World3",
     }
   },
   {
@@ -97,37 +128,17 @@ export const ALL_COMPONENTS: ComponentDefinition[] = [
     description: "A simple text component",
     type: "text",
     icon: "📝",
-    version: "1.0.0",
+    version: "4.0.0",
     configFields: {
       text: {
         type: "select",
-        defaultValue: "Hello World",
         label: "Text",
         nullable: false,
         options: [],
       },
     },
     defaultConfig: {
-        text: "Hello World",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "1.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        defaultValue: "Hello World",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World",
+        text: "Hello World4",
     }
   },
 ];
