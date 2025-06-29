@@ -32,6 +32,10 @@ export const useContentStore = defineStore("content", {
   state: () => ({
     components: ALL_COMPONENTS,
     document: [] as Component[],
+    activeComponent: {
+      component: null as Component | null,
+      setBy: "contentArea" as "tree" | "contentArea",
+    },
   }),
   actions: {
     setDocument(document: Component[]) {
@@ -44,6 +48,12 @@ export const useContentStore = defineStore("content", {
       return this.components.find(
         (component) => component.type === type && component.version === version
       );
+    },
+    setActiveComponent(component: Component | null, setBy: "tree" | "contentArea") {
+      this.activeComponent = {
+        component,
+        setBy,
+      };
     },
     findComponentById(componentId: string): ComponentLocation | null {
       const searchInArray = (
@@ -119,9 +129,10 @@ export const useContentStore = defineStore("content", {
       if (componentLocation.componentId === null) {
         // Adding to root level
         targetArray = this.document;
-        insertionIndex = componentLocation.type === "parent" 
-          ? componentLocation.insertionPosition 
-          : this.document.length;
+        insertionIndex =
+          componentLocation.type === "parent"
+            ? componentLocation.insertionPosition
+            : this.document.length;
       } else {
         const existingComponent = this.findComponentById(
           componentLocation.componentId
@@ -141,14 +152,18 @@ export const useContentStore = defineStore("content", {
         } else {
           // Add as sibling of the existing component
           targetArray = existingComponent.parent!;
-          insertionIndex = componentLocation.insertionPosition === "before" 
-            ? existingComponent.index 
-            : existingComponent.index + 1;
+          insertionIndex =
+            componentLocation.insertionPosition === "before"
+              ? existingComponent.index
+              : existingComponent.index + 1;
         }
       }
 
       // Ensure insertion index is within bounds
-      insertionIndex = Math.max(0, Math.min(insertionIndex, targetArray.length));
+      insertionIndex = Math.max(
+        0,
+        Math.min(insertionIndex, targetArray.length)
+      );
 
       targetArray.splice(insertionIndex, 0, newComponent);
     },
@@ -174,7 +189,10 @@ export const useContentStore = defineStore("content", {
       Object.assign(location.component, updatedFields);
     },
 
-    moveComponent(oldComponentId: string, componentLocation: AddComponentLocation) {
+    moveComponent(
+      oldComponentId: string,
+      componentLocation: AddComponentLocation
+    ) {
       const location = this.findComponentById(oldComponentId);
       if (!location) {
         throw new Error(`Component with ID ${oldComponentId} not found`);

@@ -3,8 +3,21 @@ import { useContentStore } from "../stores/contentStore";
 import Panel from "primevue/panel";
 import DropZone from "./DropZone.vue";
 import PreviewWrapper from "./PreviewWrapper.vue";
+import { watch } from "vue";
 
 const contentStore = useContentStore();
+
+watch(
+  () => contentStore.activeComponent,
+  (activeComponent) => {
+    if (activeComponent.setBy === "tree") {
+      document.getElementById(activeComponent.component?.id!)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }
+);
 </script>
 
 <template>
@@ -23,9 +36,11 @@ const contentStore = useContentStore();
           v-for="(component, index) in contentStore.document"
           :key="component.id + 'Wrrapper'"
           :component="component"
-          :componentPath="[index]"
         />
-        <DropZone :component-id="null" :number-of-children="contentStore.document.length"/>
+        <DropZone
+          :component-id="null"
+          :number-of-children="contentStore.document.length"
+        />
       </div>
     </div>
   </Panel>

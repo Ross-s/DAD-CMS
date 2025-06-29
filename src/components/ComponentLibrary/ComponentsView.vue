@@ -1,37 +1,56 @@
 <script lang="ts" setup>
 import { useContentStore } from "../stores/contentStore";
 import ComponentCard from "./ComponentCard.vue";
-import Panel from "primevue/panel";
 
 const contentStore = useContentStore();
 </script>
 
 <template>
-  <Panel header="Component Library" :toggleable="false" class="sidebar-panel">
-    <div class="component-list">
-      <ComponentCard
-        v-for="component in contentStore.components"
-        :component-item="component"
-        :key="component.name"
-      />
+  <div class="components-wrapper">
+    <div class="components-header">
+      <h3>Component Library</h3>
     </div>
-  </Panel>
+    <div class="components-scroll-container">
+      <div class="component-list">
+        <div v-for="component in contentStore.components" :key="component.name">
+          <ComponentCard :component-item="component" v-if="component.hideFromUI !== true" />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.sidebar-panel {
+.components-wrapper {
   height: 100%;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
 }
 
-:deep(.p-panel-content) {
-  padding: 0.75rem;
-  height: calc(100vh - 4rem);
+.components-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 6px 6px 0 0;
+  flex-shrink: 0;
+}
+
+.components-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.components-scroll-container {
+  flex: 1;
   overflow-y: auto;
-}
-
-:deep(.p-panel-header) {
-  border-bottom: 1px solid var(--p-panel-header-border-color);
+  overflow-x: hidden;
+  padding: 0.75rem;
+  min-height: 0;
 }
 
 .component-list {
