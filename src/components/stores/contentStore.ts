@@ -6,6 +6,28 @@ import {
   type MiniComponentMetadata,
 } from "../ComponentLibrary/components";
 
+const generateId = () =>
+  `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+interface ComponentLocation {
+  component: Component;
+  parent: Component[] | null;
+  index: number;
+  componentPath: number[];
+}
+
+export type AddComponentLocation =
+  | {
+      componentId: string | null;
+      type: "parent";
+      insertionPosition: number;
+    }
+  | {
+      componentId: string | null;
+      type: "sibling";
+      insertionPosition: "before" | "after";
+    };
+
 export const useContentStore = defineStore("content", {
   state: () => ({
     components: ALL_COMPONENTS,
@@ -23,16 +45,55 @@ export const useContentStore = defineStore("content", {
         (component) => component.type === type && component.version === version
       );
     },
+    findComponentById(componentId: string): ComponentLocation | null {
+      const searchInArray = (
+        components: Component[],
+        parent: Component[],
+        currentPath: number[] = []
+      ): ComponentLocation | null => {
+        for (let i = 0; i < components.length; i++) {
+          const component = components[i];
+          const componentPath = [...currentPath, i];
+
+          // Check if this is the component we're looking for
+          if (component.id === componentId) {
+            return {
+              component,
+              parent,
+              index: i,
+              componentPath,
+            };
+          }
+
+          // Recursively search in children if they exist
+          if (component.children && component.children.length > 0) {
+            const result = searchInArray(
+              component.children,
+              component.children,
+              componentPath
+            );
+            if (result) {
+              return result;
+            }
+          }
+        }
+
+        return null;
+      };
+
+      return searchInArray(this.document, this.document);
+    },
     addComponent(
       componentOrComponentMetadata: MiniComponentMetadata | Component,
-      position: number[]
+      componentLocation: AddComponentLocation
     ) {
       let newComponent: Component;
 
       if ("config" in componentOrComponentMetadata) {
         newComponent = componentOrComponentMetadata;
       } else {
-        const componentMetadata = componentOrComponentMetadata as MiniComponentMetadata;
+        const componentMetadata =
+          componentOrComponentMetadata as MiniComponentMetadata;
 
         const componentDefinition = this.findComponentByTypeAndVersion(
           componentMetadata.type,
@@ -44,6 +105,7 @@ export const useContentStore = defineStore("content", {
         }
 
         newComponent = {
+          id: generateId(),
           type: componentDefinition.type,
           version: componentDefinition.version,
           config: { ...componentDefinition.defaultConfig },
@@ -51,46 +113,88 @@ export const useContentStore = defineStore("content", {
         };
       }
 
-      let currentLevel = this.document;
-      for (let i = 0; i < position.length - 1; i++) {
-        const index = position[i];
-        if (!currentLevel[index]) {
-          currentLevel[index] = {};
+      let targetArray: Component[];
+      let insertionIndex: number;
+
+      if (componentLocation.componentId === null) {
+        // Adding to root level
+        targetArray = this.document;
+        insertionIndex = componentLocation.type === "parent" 
+          ? componentLocation.insertionPosition 
+          : this.document.length;
+      } else {
+        const existingComponent = this.findComponentById(
+          componentLocation.componentId
+        );
+
+        if (!existingComponent) {
+          throw new Error("Target component not found");
         }
-        currentLevel = currentLevel[index].children || [];
+
+        if (componentLocation.type === "parent") {
+          // Add as child of the existing component
+          if (!existingComponent.component.children) {
+            existingComponent.component.children = [];
+          }
+          targetArray = existingComponent.component.children;
+          insertionIndex = componentLocation.insertionPosition;
+        } else {
+          // Add as sibling of the existing component
+          targetArray = existingComponent.parent!;
+          insertionIndex = componentLocation.insertionPosition === "before" 
+            ? existingComponent.index 
+            : existingComponent.index + 1;
+        }
       }
 
-      currentLevel.splice(position[position.length - 1], 0, newComponent);
+      // Ensure insertion index is within bounds
+      insertionIndex = Math.max(0, Math.min(insertionIndex, targetArray.length));
+
+      targetArray.splice(insertionIndex, 0, newComponent);
     },
 
-    deleteComponent(position: number[]) {
-      let currentLevel = this.document;
-      for (let i = 0; i < position.length - 1; i++) {
-        const index = position[i];
-        if (!currentLevel[index]) {
-          throw new Error("Component not found at the specified position");
-        }
-        currentLevel = currentLevel[index].children || [];
+    deleteComponent(componentId: string) {
+      const location = this.findComponentById(componentId);
+      if (!location) {
+        throw new Error("Component not found");
       }
 
-      const indexToDelete = position[position.length - 1];
-      if (indexToDelete < 0 || indexToDelete >= currentLevel.length) {
-        throw new Error("Index out of bounds");
-      }
-
-      currentLevel.splice(indexToDelete, 1);
+      location.parent!.splice(location.index, 1);
     },
 
-    moveComponent(
-      component: Component,
-      oldPosition: number[],
-      newPosition: number[]
+    updateComponentById(
+      componentId: string,
+      updatedFields: Partial<Component>
     ) {
-      // this is not fit for purpose yet, it will not work since it relies on indexes
-      // that may change when the component is moved
-      console.log("Moving component from", oldPosition, "to", newPosition);
-      this.deleteComponent(oldPosition);
-      this.addComponent(component, newPosition);
+      const location = this.findComponentById(componentId);
+      if (!location) {
+        throw new Error("Component not found");
+      }
+
+      Object.assign(location.component, updatedFields);
+    },
+
+    moveComponent(oldComponentId: string, componentLocation: AddComponentLocation) {
+      const location = this.findComponentById(oldComponentId);
+      if (!location) {
+        throw new Error(`Component with ID ${oldComponentId} not found`);
+      }
+
+      const componentToMove = location.component;
+      const tempComponentId = generateId();
+
+      this.addComponent(
+        {
+          ...componentToMove,
+          id: tempComponentId,
+        },
+        componentLocation
+      );
+
+      this.deleteComponent(oldComponentId);
+      this.updateComponentById(tempComponentId, {
+        id: oldComponentId,
+      });
     },
   },
 });

@@ -16,16 +16,16 @@ const contentStore = useContentStore();
     </template>
     <div class="content-area">
       <div v-if="contentStore.document.length == 0">
-        <DropZone :component-path="[]" />
+        <DropZone :component-id="null" :number-of-children="0" />
       </div>
       <div v-else>
         <PreviewWrapper
           v-for="(component, index) in contentStore.document"
-          :key="component.type"
+          :key="component.id + 'Wrrapper'"
           :component="component"
           :componentPath="[index]"
         />
-        <DropZone :component-path="[contentStore.document.length]"/>
+        <DropZone :component-id="null" :number-of-children="contentStore.document.length"/>
       </div>
     </div>
   </Panel>

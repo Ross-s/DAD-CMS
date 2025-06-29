@@ -12,7 +12,6 @@ import ContainerPreview from "./Previews/ContainerPreview.vue";
 
 const props = defineProps<{
   component: Component;
-  componentPath: number[];
 }>();
 
 const contentStore = useContentStore();
@@ -23,7 +22,7 @@ const componentDefinition = contentStore.findComponentByTypeAndVersion(
 );
 
 const handleDelete = () => {
-  contentStore.deleteComponent(props.componentPath);
+  contentStore.deleteComponent(props.component.id!);
 };
 
 const isDraggingOverTop = ref(false);
@@ -50,23 +49,27 @@ function onDropOverTop(event: DragEvent) {
   if (event.dataTransfer?.effectAllowed === "copy") {
     const data = event.dataTransfer!.getData("MiniComponentMetadata");
     const component = JSON.parse(data) as MiniComponentMetadata;
-    contentStore.addComponent(component, props.componentPath);
+    contentStore.addComponent(component, {
+        componentId: props.component.id!,
+        insertionPosition: "before",
+        type: "sibling",
+    });
   }
 
   if (event.dataTransfer?.effectAllowed !== "copy") {
-    const componentJson = event.dataTransfer!.getData("Component");
-    const componentPosition = event.dataTransfer!.getData("ComponentPosition");
-    const component = JSON.parse(componentJson) as Component;
-    const position = JSON.parse(componentPosition) as number[];
-    contentStore.moveComponent(component, position, props.componentPath);
+    const componentId = event.dataTransfer!.getData("ComponentId");
+    contentStore.moveComponent(componentId, {
+        componentId: props.component.id!,
+        insertionPosition: "before",
+        type: "sibling",
+    });
   }
 }
 
 function onDragStart(event: DragEvent) {
-  event.dataTransfer?.setData("Component", JSON.stringify(props.component));
   event.dataTransfer?.setData(
-    "ComponentPosition",
-    JSON.stringify(props.componentPath)
+    "ComponentId",
+    props.component.id!
   );
   event.dataTransfer!.effectAllowed = "move";
   hideComponent.value = true;
@@ -81,7 +84,7 @@ const hideComponent = ref(false);
 </script>
 
 <template>
-  <Card class="w-full" :style="{ opacity: hideComponent ? .5 : 1 }">
+  <Card class="w-full" :style="{ opacity: hideComponent ? 0.5 : 1 }">
     <template #header>
       <div
         @dragleave="onDragLeave"
@@ -107,7 +110,7 @@ const hideComponent = ref(false);
             class="m-0"
             style="color: #374151; font-weight: 500; font-size: 1rem"
           >
-            {{ componentDefinition?.name }}
+            {{ componentDefinition?.name }} - {{ component.id }}
           </h3>
           <Button
             severity="danger"
@@ -144,7 +147,6 @@ const hideComponent = ref(false);
         />
         <ContainerPreview
           v-if="componentDefinition?.type == 'container'"
-          :component-path="componentPath"
           :component="component"
         />
       </div>

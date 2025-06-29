@@ -6,29 +6,21 @@ import PreviewWrapper from "../PreviewWrapper.vue";
 
 const props = defineProps<{
   component: Component;
-  componentPath: number[];
 }>();
 
-const contentStore = useContentStore();
-
-const componentDefinition = contentStore.findComponentByTypeAndVersion(
-  props.component.type!,
-  props.component.version!
-);
 </script>
 
 <template>
   <div>
     <div v-if="component.children?.length == 0">
-      <DropZone :component-path="[...componentPath, 0]" />
+      <DropZone :component-id="props.component.id!" :number-of-children="0" />
     </div>
     <div v-else>
         <PreviewWrapper 
-          v-for="(child, index) in component.children"
-          :key="index"
-          :component="child"
-          :componentPath="[...componentPath, index]" />
-          <DropZone :component-path="[...componentPath, component?.children?.length!]" />
+          v-for="(child, index) in props.component.children"
+          :key="child.id + 'Wrapper'"
+          :component="child" />
+          <DropZone :component-id="props.component.id!" :number-of-children="props.component.children?.length ?? 0" />
     </div>
   </div>
 </template>

@@ -3,7 +3,8 @@ import type { Component, MiniComponentMetadata } from "../ComponentLibrary/compo
 import { useContentStore } from "../stores/contentStore";
 
 const props = defineProps<{
-  componentPath: number[];
+  componentId: string | null;
+  numberOfChildren: number;
 }>();
 
 const contentStore = useContentStore();
@@ -19,19 +20,23 @@ function onDragOver(event: DragEvent) {
 
 function onDrop(event: DragEvent) {
   event.preventDefault();
-
   if (event.dataTransfer?.effectAllowed === "copy") {
     const data = event.dataTransfer!.getData("MiniComponentMetadata");
     const component = JSON.parse(data) as MiniComponentMetadata;
-    contentStore.addComponent(component, props.componentPath);
+    contentStore.addComponent(component, {
+        componentId: props.componentId,
+        insertionPosition: props.numberOfChildren,
+        type: "parent"
+    });
   }
 
   if (event.dataTransfer?.effectAllowed !== "copy") {
-    const componentJson = event.dataTransfer!.getData("Component");
-    const componentPosition = event.dataTransfer!.getData("ComponentPosition");
-    const component = JSON.parse(componentJson) as Component;
-    const position = JSON.parse(componentPosition) as number[];
-    contentStore.moveComponent(component, position, props.componentPath);
+    const componentId = event.dataTransfer!.getData("ComponentId");
+    contentStore.moveComponent(componentId, {
+        componentId: props.componentId,
+        insertionPosition: props.numberOfChildren,
+        type: "parent"
+    });
   }
 }
 </script>

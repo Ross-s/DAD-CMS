@@ -16,6 +16,7 @@ export type ComponentConfigFieldSelectionOption = {
 };
 
 export type Component = {
+    id?: string;
     type?: string
     version?: string;
     config?: Record<string, any>;
