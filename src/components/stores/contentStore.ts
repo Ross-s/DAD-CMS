@@ -9,6 +9,37 @@ import {
 const generateId = () =>
   `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
+const createComponentChildren = (defaultChildren: Component[], components: ComponentDefinition[]): Component[] => {
+  return defaultChildren.map(child => {
+    // Ensure type and version exist
+    if (!child.type || !child.version) {
+      throw new Error(`Invalid child component: missing type or version`);
+    }
+
+    const childDefinition = components.find(
+      (component) => component.type === child.type && component.version === child.version
+    );
+    
+    if (!childDefinition) {
+      // If we can't find the definition, just create a copy with new ID
+      return {
+        ...child,
+        id: generateId(),
+        children: child.children ? createComponentChildren(child.children, components) : []
+      };
+    }
+
+    // Create a proper new component instance
+    return {
+      id: generateId(),
+      type: childDefinition.type,
+      version: childDefinition.version,
+      config: { ...child.config || childDefinition.defaultConfig },
+      children: createComponentChildren(child.children || childDefinition.defaultChildren || [], components)
+    };
+  });
+};
+
 interface ComponentLocation {
   component: Component;
   parent: Component[] | null;
@@ -34,7 +65,7 @@ export const useContentStore = defineStore("content", {
     _document: [] as Component[],
     _activeComponent: {
       component: null as Component | null,
-      setBy: "contentArea" as "tree" | "contentArea",
+      setBy: "contentArea" as "tree" | "contentArea" | null,
     },
   }),
   getters: {
@@ -54,7 +85,7 @@ export const useContentStore = defineStore("content", {
         (component) => component.type === type && component.version === version
       );
     },
-    setActiveComponent(component: Component | null, setBy: "tree" | "contentArea") {
+    setActiveComponent(component: Component | null, setBy: "tree" | "contentArea" | null) {
       this._activeComponent = {
         component,
         setBy,
@@ -119,12 +150,13 @@ export const useContentStore = defineStore("content", {
           throw new Error("Component not found");
         }
 
+        // Create new component with properly instantiated children
         newComponent = {
           id: generateId(),
           type: componentDefinition.type,
           version: componentDefinition.version,
           config: { ...componentDefinition.defaultConfig },
-          children: [],
+          children: createComponentChildren(componentDefinition.defaultChildren || [], this._components),
         };
       }
 

@@ -2,26 +2,62 @@
 import { computed } from "vue";
 import { useContentStore } from "../stores/contentStore";
 import { isEmptyOrSpaces } from "../../lib/utils";
+import ConfigFieldResolver from "./ConfigFieldResolver.vue";
 
 const contentStore = useContentStore();
 const component = computed(() => contentStore.activeComponent.component);
-const componentDefinition = computed(() => contentStore.findComponentByTypeAndVersion(
-  component.value?.type!,
-  component.value?.version!
-));
-
-const hasInternalName = computed(() => 
-  !isEmptyOrSpaces(component.value?.internaleName)
+const componentDefinition = computed(() =>
+  contentStore.findComponentByTypeAndVersion(
+    component.value?.type!,
+    component.value?.version!
+  )
 );
 
-console.log(contentStore.activeComponent);
+const hasInternalName = computed(
+  () => !isEmptyOrSpaces(component.value?.internaleName)
+);
+
+const clearActiveComponent = () => {
+  contentStore.setActiveComponent(null, null);
+};
+
+
 </script>
 <template>
   <div class="config-wrapper">
     <div class="config-header">
-      <h3 v-if="component === null">Settings</h3>
-      <h3 v-if="component !== null && !hasInternalName">Settings - {{ componentDefinition?.name }}</h3>
-      <h3 v-else>Settings - {{ componentDefinition?.name }} - {{ component?.internaleName }}</h3>
+      <div class="config-header-content">
+        <h3 v-if="component === null">Settings</h3>
+        <h3 v-if="component !== null && !hasInternalName">
+          Settings - {{ componentDefinition?.name }}
+        </h3>
+        <h3 v-if="component !== null && hasInternalName">
+          Settings - {{ componentDefinition?.name }} -
+          {{ component?.internaleName }}
+        </h3>
+        <button
+          v-if="component !== null"
+          @click="clearActiveComponent"
+          class="close-button"
+          aria-label="Close configuration panel"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
     <div v-if="contentStore.activeComponent.component === null">
       <div class="config-content">
@@ -56,6 +92,12 @@ console.log(contentStore.activeComponent);
         </div>
       </div>
     </div>
+    <div v-if="contentStore.activeComponent.component !== null">
+      <ConfigFieldResolver 
+        :component="contentStore.activeComponent.component"
+        :component-definition="componentDefinition!"
+        />
+    </div>
   </div>
 </template>
 
@@ -76,6 +118,12 @@ console.log(contentStore.activeComponent);
   flex-shrink: 0;
 }
 
+.config-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .config-header h3 {
   margin: 0;
   font-size: 1rem;
@@ -83,12 +131,27 @@ console.log(contentStore.activeComponent);
   color: #374151;
 }
 
-.config-content {
-  flex: 1;
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  border-radius: 4px;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.close-button:active {
+  background-color: #e5e7eb;
 }
 
 .select-component-container {

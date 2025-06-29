@@ -29,7 +29,7 @@ const buildPrimeTreeNodes = (components: Component[]): TreeNode[] => {
 
     return {
       key: component.id || "",
-      label: isEmptyOrSpaces(component.internaleName) ? componentDef?.name : `${componentDef?.name} - ${component.internaleName}`,
+      label: isEmptyOrSpaces(component.internaleName) ? (componentDef?.name ?? "Unknown") : `${componentDef?.name} - ${component.internaleName}`,
       icon: componentDef?.icon || "📦",
       data: component,
       children: component.children

@@ -37,11 +37,14 @@ export type ComponentDefinition = {
   icon: string;
   version: string;
   hideFromUI?: boolean;
-  allowsChildren?: boolean;
   defaultConfig?: Record<string, any>;
+  defaultChildren?: Component[];
   configFields: {
     [key: string]:
-      | ComponentConfigField<"text", string>
+      | ComponentConfigFieldWithExtraFields<"text", string, {
+        maxLength?: number;
+        minLength?: number;
+      }>
       | ComponentConfigFieldWithExtraFields<
           "number",
           number,
@@ -70,14 +73,26 @@ export const ALL_COMPONENTS: ComponentDefinition[] = [
     version: "1.0.0",
     configFields: {
       text: {
-        type: "select",
+        type: "text",
         label: "Text",
         nullable: false,
-        options: [],
+        minLength: 1,
+        maxLength: 1000
       },
+      test: {
+        type: "select",
+        label: "Test",
+        options: [
+          { label: "Option 1", value: "option1" },
+          { label: "Option 2", value: "option2" },
+          { label: "Option 3", value: "option3" }
+        ],
+        nullable: true,
+      }
     },
     defaultConfig: {
         text: "Hello World1",
+        test: ""
     }
   },
   {
@@ -89,204 +104,15 @@ export const ALL_COMPONENTS: ComponentDefinition[] = [
     version: "1.0.0",
     configFields: {},
     defaultConfig: {},
-    allowsChildren: true
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "2.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World2",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "3.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World3",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "4.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World4",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "5.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World5",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "6.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World6",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "7.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World7",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "8.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World8",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "9.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World9",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "10.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World10",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "11.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World11",
-    }
-  },
-  {
-    name: "Text",
-    description: "A simple text component",
-    type: "text",
-    icon: "📝",
-    version: "12.0.0",
-    configFields: {
-      text: {
-        type: "select",
-        label: "Text",
-        nullable: false,
-        options: [],
-      },
-    },
-    defaultConfig: {
-        text: "Hello World12",
-    }
-  },
+    defaultChildren: [
+      {
+        type: "text",
+        version: "1.0.0",
+        config: {
+          text: "Default Text in Container"
+        },
+        children: []
+      }
+    ]
+  }
 ];
