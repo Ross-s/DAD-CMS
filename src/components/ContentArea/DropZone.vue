@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Component, MiniComponentMetadata } from "../ComponentLibrary/components";
+import type { Component, MiniComponentDefinition } from "../ComponentLibrary/components";
 import { useContentStore } from "../stores/contentStore";
 
 const props = defineProps<{
@@ -21,8 +21,8 @@ function onDragOver(event: DragEvent) {
 function onDrop(event: DragEvent) {
   event.preventDefault();
   if (event.dataTransfer?.effectAllowed === "copy") {
-    const data = event.dataTransfer!.getData("MiniComponentMetadata");
-    const component = JSON.parse(data) as MiniComponentMetadata;
+    const data = event.dataTransfer!.getData("MiniComponentDefinition");
+    const component = JSON.parse(data) as MiniComponentDefinition;
     contentStore.addComponent(component, {
         componentId: props.componentId,
         insertionPosition: props.numberOfChildren,

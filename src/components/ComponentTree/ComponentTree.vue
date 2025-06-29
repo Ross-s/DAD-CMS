@@ -3,6 +3,7 @@ import { computed, ref, watch, nextTick } from "vue";
 import { useContentStore } from "../stores/contentStore";
 import type { Component } from "../ComponentLibrary/components";
 import Tree from "primevue/tree";
+import { isEmptyOrSpaces } from "../../lib/utils";
 
 interface TreeNode {
   key: string;
@@ -28,7 +29,7 @@ const buildPrimeTreeNodes = (components: Component[]): TreeNode[] => {
 
     return {
       key: component.id || "",
-      label: componentDef?.name || component.type || "Unknown",
+      label: isEmptyOrSpaces(component.internaleName) ? componentDef?.name : `${componentDef?.name} - ${component.internaleName}`,
       icon: componentDef?.icon || "📦",
       data: component,
       children: component.children
@@ -151,10 +152,6 @@ watch(
   <div class="tree-wrapper">
     <div class="tree-header">
       <h3>Component Tree</h3>
-      <div class="debug-info">
-        Document components: {{ documentTree.length }} | Tree nodes:
-        {{ treeNodes.length }}
-      </div>
     </div>
 
     <div class="tree-body">
@@ -206,7 +203,7 @@ watch(
 }
 
 .tree-header h3 {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   font-size: 1rem;
   font-weight: 600;
   color: #374151;
@@ -246,13 +243,10 @@ watch(
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0.5rem;
-  /* Force a specific height for testing */
-  max-height: 300px;
+  min-height: 0; /* Allows flex child to shrink below content size */
 }
 
-.component-tree {
-  /* Let the tree expand naturally */
-}
+
 
 .tree-node-content {
   display: flex;

@@ -1,20 +1,25 @@
 <script setup lang="ts">
 import type {
   Component,
-  MiniComponentMetadata,
+  MiniComponentDefinition,
 } from "../ComponentLibrary/components";
 import Card from "primevue/card";
 import Button from "primevue/button";
 import { useContentStore } from "../stores/contentStore";
 import TextPreview from "./Previews/TextPreview.vue";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import ContainerPreview from "./Previews/ContainerPreview.vue";
+import { isEmptyOrSpaces } from "../../lib/utils";
 
 const props = defineProps<{
   component: Component;
 }>();
 
 const contentStore = useContentStore();
+
+const hasInternalName = computed(() => 
+  !isEmptyOrSpaces(props.component.internaleName)
+);
 
 const componentDefinition = contentStore.findComponentByTypeAndVersion(
   props.component.type!,
@@ -47,8 +52,8 @@ function onDropOverTop(event: DragEvent) {
   isDraggingOverTop.value = false;
 
   if (event.dataTransfer?.effectAllowed === "copy") {
-    const data = event.dataTransfer!.getData("MiniComponentMetadata");
-    const component = JSON.parse(data) as MiniComponentMetadata;
+    const data = event.dataTransfer!.getData("MiniComponentDefinition");
+    const component = JSON.parse(data) as MiniComponentDefinition;
     contentStore.addComponent(component, {
       componentId: props.component.id!,
       insertionPosition: "before",
@@ -97,10 +102,18 @@ const hideComponent = ref(false);
           <div v-if="isDraggingOverTop" class="drag-above"></div>
           <div class="component-header">
             <h3
+              v-if="!hasInternalName"
               class="m-0"
               style="color: #374151; font-weight: 500; font-size: 1rem"
             >
-              {{ componentDefinition?.name }} - {{ props.component.id }}
+              {{ componentDefinition?.name }}
+            </h3>
+            <h3
+              v-else
+              class="m-0"
+              style="color: #374151; font-weight: 500; font-size: 1rem"
+            >
+              {{ componentDefinition?.name }} - {{ props.component.internaleName }}
             </h3>
             <Button
               severity="danger"

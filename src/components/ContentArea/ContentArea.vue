@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { useContentStore } from "../stores/contentStore";
-import Panel from "primevue/panel";
 import DropZone from "./DropZone.vue";
 import PreviewWrapper from "./PreviewWrapper.vue";
 import { watch } from "vue";
@@ -21,54 +20,62 @@ watch(
 </script>
 
 <template>
-  <Panel header="Page Content" :toggleable="false" class="content-panel">
-    <template #header>
-      <div class="panel-header-content">
-        <span>Page Content</span>
-      </div>
-    </template>
-    <div class="content-area">
-      <div v-if="contentStore.document.length == 0">
-        <DropZone :component-id="null" :number-of-children="0" />
-      </div>
-      <div v-else>
-        <PreviewWrapper
-          v-for="(component, index) in contentStore.document"
-          :key="component.id + 'Wrrapper'"
-          :component="component"
-        />
-        <DropZone
-          :component-id="null"
-          :number-of-children="contentStore.document.length"
-        />
+  <div class="content-wrapper">
+    <div class="content-header">
+      <h3>Page Content</h3>
+    </div>
+    <div class="content-body">
+      <div class="content-area">
+        <div v-if="contentStore.document.length == 0">
+          <DropZone :component-id="null" :number-of-children="0" />
+        </div>
+        <div v-else>
+          <PreviewWrapper
+            v-for="component in contentStore.document"
+            :key="component.id + 'Wrrapper'"
+            :component="component"
+          />
+          <DropZone
+            :component-id="null"
+            :number-of-children="contentStore.document.length"
+          />
+        </div>
       </div>
     </div>
-  </Panel>
+  </div>
 </template>
 
 <style scoped>
-.main-content {
+.content-wrapper {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
 }
 
-.content-panel {
-  height: 100%;
-  overflow: hidden;
+.content-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 6px 6px 0 0;
+  flex-shrink: 0;
 }
 
-:deep(.p-panel-content) {
-  padding: 0;
-  height: calc(100vh - 4rem);
-  overflow-y: auto;
+.content-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
 }
 
-.panel-header-content {
+.content-body {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .content-area {
@@ -79,5 +86,6 @@ watch(
   border-radius: var(--p-border-radius);
   margin: 1rem;
   transition: all 0.3s ease;
+  overflow-y: auto;
 }
 </style>

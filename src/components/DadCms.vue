@@ -4,6 +4,7 @@ import SplitterPanel from "primevue/splitterpanel";
 import ComponentsView from "./ComponentLibrary/ComponentsView.vue";
 import ContentArea from "./ContentArea/ContentArea.vue";
 import ComponentTree from "./ComponentTree/ComponentTree.vue";
+import ConfigSection from "./ConfigSection/ConfigSection.vue";
 </script>
 
 <template>
@@ -31,7 +32,7 @@ import ComponentTree from "./ComponentTree/ComponentTree.vue";
       <ContentArea />
     </SplitterPanel>
     <SplitterPanel class="flex items-center justify-center">
-      Panel 3
+      <ConfigSection />
     </SplitterPanel>
   </Splitter>
 </template>

@@ -3,7 +3,7 @@ import {
   ALL_COMPONENTS,
   type Component,
   type ComponentDefinition,
-  type MiniComponentMetadata,
+  type MiniComponentDefinition,
 } from "../ComponentLibrary/components";
 
 const generateId = () =>
@@ -30,27 +30,32 @@ export type AddComponentLocation =
 
 export const useContentStore = defineStore("content", {
   state: () => ({
-    components: ALL_COMPONENTS,
-    document: [] as Component[],
-    activeComponent: {
+    _components: ALL_COMPONENTS,
+    _document: [] as Component[],
+    _activeComponent: {
       component: null as Component | null,
       setBy: "contentArea" as "tree" | "contentArea",
     },
   }),
+  getters: {
+    activeComponent: (state) => state._activeComponent,
+    document: (state) => state._document,
+    components: (state) => state._components, 
+  },
   actions: {
     setDocument(document: Component[]) {
-      this.document = document;
+      this._document = document;
     },
     findComponentByTypeAndVersion(
       type: string,
       version: string
     ): ComponentDefinition | undefined {
-      return this.components.find(
+      return this._components.find(
         (component) => component.type === type && component.version === version
       );
     },
     setActiveComponent(component: Component | null, setBy: "tree" | "contentArea") {
-      this.activeComponent = {
+      this._activeComponent = {
         component,
         setBy,
       };
@@ -91,23 +96,23 @@ export const useContentStore = defineStore("content", {
         return null;
       };
 
-      return searchInArray(this.document, this.document);
+      return searchInArray(this._document, this._document);
     },
     addComponent(
-      componentOrComponentMetadata: MiniComponentMetadata | Component,
+      componentOrComponentDefinition: MiniComponentDefinition | Component,
       componentLocation: AddComponentLocation
     ) {
       let newComponent: Component;
 
-      if ("config" in componentOrComponentMetadata) {
-        newComponent = componentOrComponentMetadata;
+      if ("config" in componentOrComponentDefinition) {
+        newComponent = componentOrComponentDefinition;
       } else {
-        const componentMetadata =
-          componentOrComponentMetadata as MiniComponentMetadata;
+        const componentDefinitionCast =
+          componentOrComponentDefinition as MiniComponentDefinition;
 
         const componentDefinition = this.findComponentByTypeAndVersion(
-          componentMetadata.type,
-          componentMetadata.version
+          componentDefinitionCast.type,
+          componentDefinitionCast.version
         );
 
         if (!componentDefinition) {
@@ -128,11 +133,11 @@ export const useContentStore = defineStore("content", {
 
       if (componentLocation.componentId === null) {
         // Adding to root level
-        targetArray = this.document;
+        targetArray = this._document;
         insertionIndex =
           componentLocation.type === "parent"
             ? componentLocation.insertionPosition
-            : this.document.length;
+            : this._document.length;
       } else {
         const existingComponent = this.findComponentById(
           componentLocation.componentId
@@ -175,6 +180,10 @@ export const useContentStore = defineStore("content", {
       }
 
       location.parent!.splice(location.index, 1);
+
+      if (this._activeComponent.component?.id === componentId) {
+        this._activeComponent.component = null;
+      }
     },
 
     updateComponentById(

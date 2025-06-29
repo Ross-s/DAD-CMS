@@ -17,13 +17,14 @@ export type ComponentConfigFieldSelectionOption = {
 
 export type Component = {
     id?: string;
+    internaleName?: string;
     type?: string
     version?: string;
     config?: Record<string, any>;
     children?: Component[];
 }
 
-export type MiniComponentMetadata = {
+export type MiniComponentDefinition = {
   type: string;
   version: string;
 };

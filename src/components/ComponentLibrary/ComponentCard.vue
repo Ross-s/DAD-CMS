@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Card } from "primevue";
-import type { ComponentDefinition, MiniComponentMetadata } from "./components";
+import type { ComponentDefinition, MiniComponentDefinition } from "./components";
 import { onMounted, ref, useTemplateRef, watch } from "vue";
 
 const props = defineProps<{
@@ -12,11 +12,11 @@ const componentRef = useTemplateRef<HTMLDivElement>("componentRef");
 
 function onDragStart(event: DragEvent) {
   event.dataTransfer?.setData(
-    "MiniComponentMetadata",
+    "MiniComponentDefinition",
     JSON.stringify({
       type: props.componentItem.type,
       version: props.componentItem.version,
-    } as MiniComponentMetadata)
+    } as MiniComponentDefinition)
   );
   event.dataTransfer!.effectAllowed = "copy";
 }
