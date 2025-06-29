@@ -1,4 +1,4 @@
-export type ComponentConfigField<TName, TValueType> = {
+export type ComponentConfigField<TName> = {
   type: TName;
   label?: string;
   nullable?: boolean;
@@ -6,9 +6,8 @@ export type ComponentConfigField<TName, TValueType> = {
 
 export type ComponentConfigFieldWithExtraFields<
   TName,
-  TValueType,
   TExtraFields
-> = ComponentConfigField<TName, TValueType> & TExtraFields;
+> = ComponentConfigField<TName> & TExtraFields;
 
 export type ComponentConfigFieldSelectionOption = {
   label: string;
@@ -42,7 +41,6 @@ export type ComponentDefinition = {
     [key: string]:
       | ComponentConfigFieldWithExtraFields<
           "text",
-          string,
           {
             maxLength?: number;
             minLength?: number;
@@ -50,21 +48,19 @@ export type ComponentDefinition = {
         >
       | ComponentConfigFieldWithExtraFields<
           "number",
-          number,
           {
             min?: number;
             max?: number;
           }
         >
-      | ComponentConfigField<"boolean", boolean>
+      | ComponentConfigField<"boolean">
       | ComponentConfigFieldWithExtraFields<
           "select",
-          string,
           { options: ComponentConfigFieldSelectionOption[] }
         >
-      | ComponentConfigField<"color", string>
-      | ComponentConfigField<"url", string>
-      | ComponentConfigField<"tabManager", null>;
+      | ComponentConfigField<"color">
+      | ComponentConfigField<"url">
+      | ComponentConfigField<"tabManager">;
   };
 };
 

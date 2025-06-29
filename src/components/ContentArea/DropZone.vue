@@ -1,9 +1,6 @@
 <script lang="ts" setup>
 import { isEmptyOrSpaces } from "../../lib/utils";
-import type {
-  Component,
-  MiniComponentDefinition,
-} from "../ComponentLibrary/components";
+import type { MiniComponentDefinition } from "../ComponentLibrary/components";
 import { useContentStore } from "../stores/contentStore";
 
 const props = defineProps<{

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Card } from "primevue";
 import type { ComponentDefinition, MiniComponentDefinition } from "./components";
-import { onMounted, ref, useTemplateRef, watch } from "vue";
+import { useTemplateRef } from "vue";
 
 const props = defineProps<{
   componentItem: ComponentDefinition;

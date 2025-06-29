@@ -4,7 +4,6 @@ import { ref, computed, watch } from "vue";
 import PreviewWrapper from "../PreviewWrapper.vue";
 import DropZone from "../DropZone.vue";
 import { useContentStore } from "../../stores/contentStore";
-import { tab } from "@primeuix/themes/aura/tabs";
 
 const props = defineProps<{
   component: Component;

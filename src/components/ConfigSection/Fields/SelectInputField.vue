@@ -8,7 +8,6 @@ import type { ComponentConfigFieldWithExtraFields, ComponentConfigFieldSelection
 const props = withDefaults(
   defineProps<{
     fieldSettings: ComponentConfigFieldWithExtraFields<
-      "select",
       string,
       {
         options: ComponentConfigFieldSelectionOption[];

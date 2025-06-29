@@ -8,7 +8,6 @@ import type { ComponentConfigFieldWithExtraFields } from "../../ComponentLibrary
 const props = withDefaults(
   defineProps<{
     fieldSettings: ComponentConfigFieldWithExtraFields<
-      "text",
       string,
       {
         maxLength?: number;
