@@ -29,7 +29,7 @@ const buildPrimeTreeNodes = (components: Component[]): TreeNode[] => {
 
     return {
       key: component.id || "",
-      label: isEmptyOrSpaces(component.internaleName) ? (componentDef?.name ?? "Unknown") : `${componentDef?.name} - ${component.internaleName}`,
+      label: isEmptyOrSpaces(component.internalName) ? (componentDef?.name ?? "Unknown") : `${componentDef?.name} - ${component.internalName}`,
       icon: componentDef?.icon || "📦",
       data: component,
       children: component.children
@@ -45,6 +45,36 @@ const onNodeSelect = (node: any) => {
   if (node.data) {
     contentStore.setActiveComponent(node.data as Component, "tree");
   }
+};
+
+// Function to get all node keys recursively
+const getAllNodeKeys = (nodes: TreeNode[]): string[] => {
+  const keys: string[] = [];
+  const traverse = (nodeList: TreeNode[]) => {
+    nodeList.forEach((node) => {
+      keys.push(node.key);
+      if (node.children) {
+        traverse(node.children);
+      }
+    });
+  };
+  traverse(nodes);
+  return keys;
+};
+
+// Function to expand all nodes
+const expandAll = () => {
+  const allKeys = getAllNodeKeys(treeNodes.value);
+  const expandedKeysObj: Record<string, boolean> = {};
+  allKeys.forEach((key) => {
+    expandedKeysObj[key] = true;
+  });
+  expandedKeys.value = expandedKeysObj;
+};
+
+// Function to collapse all nodes
+const collapseAll = () => {
+  expandedKeys.value = {};
 };
 
 // Function to find all parent keys for a given component ID
@@ -152,6 +182,24 @@ watch(
   <div class="tree-wrapper">
     <div class="tree-header">
       <h3>Component Tree</h3>
+      <div class="tree-controls">
+        <button 
+          @click="expandAll" 
+          class="tree-control-btn expand-btn"
+          title="Expand All"
+          :disabled="treeNodes.length === 0"
+        >
+          +
+        </button>
+        <button 
+          @click="collapseAll" 
+          class="tree-control-btn collapse-btn"
+          title="Collapse All"
+          :disabled="treeNodes.length === 0"
+        >
+          -
+        </button>
+      </div>
     </div>
 
     <div class="tree-body">
@@ -200,6 +248,9 @@ watch(
   background: #f9fafb;
   border-radius: 6px 6px 0 0;
   flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .tree-header h3 {
@@ -207,6 +258,49 @@ watch(
   font-size: 1rem;
   font-weight: 600;
   color: #374151;
+}
+
+.tree-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tree-control-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  color: #374151;
+  transition: all 0.15s ease;
+}
+
+.tree-control-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.tree-control-btn:active:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.tree-control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.expand-btn {
+  color: #059669;
+}
+
+.collapse-btn {
+  color: #dc2626;
 }
 
 .debug-info {

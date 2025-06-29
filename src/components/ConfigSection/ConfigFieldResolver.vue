@@ -6,6 +6,7 @@ import type {
 import { useContentStore } from "../stores/contentStore";
 import TextInputField from "./Fields/TextInputField.vue";
 import SelectInputField from "./Fields/SelectInputField.vue";
+import TabManagementField from "./Fields/TabManagementField.vue";
 
 const props = defineProps<{
   component: Component;
@@ -25,7 +26,8 @@ const updateFieldValue = (configFieldName: string, value: any) => {
 </script>
 
 <template>
-  <div class="config-content">
+  <br />
+  <div class="config-field">
     <TextInputField
       :field-settings="{
         type: 'text',
@@ -34,10 +36,10 @@ const updateFieldValue = (configFieldName: string, value: any) => {
         maxLength: 30,
         minLength: 3,
       }"
-      :value="props.component?.internaleName!"
+      :value="props.component?.internalName!"
       @update:value="(value) =>
             contentStore.updateComponentById(props.component?.id!, {
-              internaleName: value,
+              internalName: value,
             })"
     />
   </div>
@@ -47,7 +49,7 @@ const updateFieldValue = (configFieldName: string, value: any) => {
     )"
     :key="configFieldName"
   >
-    <div class="config-content">
+    <div class="config-field">
       <TextInputField
         v-if="
           props.componentDefinition?.configFields[configFieldName].type ===
@@ -70,12 +72,20 @@ const updateFieldValue = (configFieldName: string, value: any) => {
         :value="props.component?.config?.[configFieldName]!"
         @update:value="(value) => updateFieldValue(configFieldName, value)"
       />
+      <TabManagementField
+        v-if="
+          props.componentDefinition?.configFields[configFieldName].type ===
+          'tabManager'
+        "
+        :component="props.component"
+        :component-definition="props.componentDefinition"
+      />
     </div>
   </div>
 </template>
 
 <style scoped>
-.config-content {
+.config-field {
   margin-top: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;

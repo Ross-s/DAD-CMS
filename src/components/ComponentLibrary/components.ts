@@ -16,19 +16,18 @@ export type ComponentConfigFieldSelectionOption = {
 };
 
 export type Component = {
-    id?: string;
-    internaleName?: string;
-    type?: string
-    version?: string;
-    config?: Record<string, any>;
-    children?: Component[];
-}
+  id?: string;
+  internalName?: string;
+  type?: string;
+  version?: string;
+  config?: Record<string, any>;
+  children?: Component[];
+};
 
 export type MiniComponentDefinition = {
   type: string;
   version: string;
 };
-
 
 export type ComponentDefinition = {
   name: string;
@@ -41,10 +40,14 @@ export type ComponentDefinition = {
   defaultChildren?: Component[];
   configFields: {
     [key: string]:
-      | ComponentConfigFieldWithExtraFields<"text", string, {
-        maxLength?: number;
-        minLength?: number;
-      }>
+      | ComponentConfigFieldWithExtraFields<
+          "text",
+          string,
+          {
+            maxLength?: number;
+            minLength?: number;
+          }
+        >
       | ComponentConfigFieldWithExtraFields<
           "number",
           number,
@@ -60,7 +63,8 @@ export type ComponentDefinition = {
           { options: ComponentConfigFieldSelectionOption[] }
         >
       | ComponentConfigField<"color", string>
-      | ComponentConfigField<"url", string>;
+      | ComponentConfigField<"url", string>
+      | ComponentConfigField<"tabManager", null>;
   };
 };
 
@@ -77,7 +81,7 @@ export const ALL_COMPONENTS: ComponentDefinition[] = [
         label: "Text",
         nullable: false,
         minLength: 1,
-        maxLength: 1000
+        maxLength: 1000,
       },
       test: {
         type: "select",
@@ -85,15 +89,15 @@ export const ALL_COMPONENTS: ComponentDefinition[] = [
         options: [
           { label: "Option 1", value: "option1" },
           { label: "Option 2", value: "option2" },
-          { label: "Option 3", value: "option3" }
+          { label: "Option 3", value: "option3" },
         ],
         nullable: true,
-      }
+      },
     },
     defaultConfig: {
-        text: "Hello World1",
-        test: ""
-    }
+      text: "Hello World1",
+      test: "",
+    },
   },
   {
     name: "Container",
@@ -109,10 +113,65 @@ export const ALL_COMPONENTS: ComponentDefinition[] = [
         type: "text",
         version: "1.0.0",
         config: {
-          text: "Default Text in Container"
+          text: "Default Text in Container",
         },
-        children: []
-      }
-    ]
-  }
+        children: [],
+      },
+    ],
+  },
+  {
+    name: "Tabs",
+    description: "A component that holds multiple tabs",
+    type: "tabs",
+    icon: "📑",
+    version: "1.0.0",
+    configFields: {
+      tabs: {
+        type: "tabManager",
+        label: "Tabs",
+        nullable: false,
+      },
+    },
+    defaultConfig: {},
+    defaultChildren: [
+      {
+        type: "tab",
+        version: "1.0.0",
+        internalName: "New Tab",
+        config: {
+          title: "New Tab",
+        }
+      },
+    ],
+  },
+  {
+    name: "Tab",
+    description: "A single tab within a Tabs component",
+    type: "tab",
+    icon: "🗂️",
+    version: "1.0.0",
+    configFields: {
+      title: {
+        type: "text",
+        label: "Tab Title",
+        nullable: false,
+        minLength: 1,
+        maxLength: 30,
+      },
+    },
+    hideFromUI: true,
+    defaultConfig: {
+      title: "New Tab",
+    },
+    defaultChildren: [
+      {
+        type: "text",
+        version: "1.0.0",
+        config: {
+          text: "Default Text in Tab",
+        },
+        children: [],
+      },
+    ],
+  },
 ];

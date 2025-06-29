@@ -7,8 +7,9 @@ import Card from "primevue/card";
 import Button from "primevue/button";
 import { useContentStore } from "../stores/contentStore";
 import TextPreview from "./Previews/TextPreview.vue";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import ContainerPreview from "./Previews/ContainerPreview.vue";
+import TabsPreview from "./Previews/TabsPreview.vue";
 import { isEmptyOrSpaces } from "../../lib/utils";
 
 const props = defineProps<{
@@ -17,8 +18,8 @@ const props = defineProps<{
 
 const contentStore = useContentStore();
 
-const hasInternalName = computed(() => 
-  !isEmptyOrSpaces(props.component.internaleName)
+const hasInternalName = computed(
+  () => !isEmptyOrSpaces(props.component.internalName)
 );
 
 const componentDefinition = contentStore.findComponentByTypeAndVersion(
@@ -53,6 +54,9 @@ function onDropOverTop(event: DragEvent) {
 
   if (event.dataTransfer?.effectAllowed === "copy") {
     const data = event.dataTransfer!.getData("MiniComponentDefinition");
+    if (isEmptyOrSpaces(data)) {
+      return;
+    }
     const component = JSON.parse(data) as MiniComponentDefinition;
     contentStore.addComponent(component, {
       componentId: props.component.id!,
@@ -63,6 +67,9 @@ function onDropOverTop(event: DragEvent) {
 
   if (event.dataTransfer?.effectAllowed !== "copy") {
     const componentId = event.dataTransfer!.getData("ComponentId");
+    if (isEmptyOrSpaces(componentId)) {
+      return;
+    }
     contentStore.moveComponent(componentId, {
       componentId: props.component.id!,
       insertionPosition: "before",
@@ -86,83 +93,83 @@ const hideComponent = ref(false);
 </script>
 
 <template>
-  <KeepAlive>
-    <Card class="w-full" :style="{ opacity: hideComponent ? 0.5 : 1 }">
-      <template #header>
-        <div
-          @dragleave="onDragLeave"
-          @drop="onDropOverTop"
-          @dragover="onDragOverTop"
-          draggable="true"
-          @dragstart="onDragStart"
-          @dragend="onDragEnd"
-          @click="contentStore.setActiveComponent(props.component, 'contentArea')"
-          :id="props.component.id"
-        >
-          <div v-if="isDraggingOverTop" class="drag-above"></div>
-          <div class="component-header">
-            <h3
-              v-if="!hasInternalName"
-              class="m-0"
-              style="color: #374151; font-weight: 500; font-size: 1rem"
-            >
-              {{ componentDefinition?.name }}
-            </h3>
-            <h3
-              v-else
-              class="m-0"
-              style="color: #374151; font-weight: 500; font-size: 1rem"
-            >
-              {{ componentDefinition?.name }} - {{ props.component.internaleName }}
-            </h3>
-            <Button
-              severity="danger"
-              size="small"
-              outlined
-              @click="handleDelete"
-              aria-label="Delete component"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+      <Card class="w-full" :style="{ opacity: hideComponent ? 0.5 : 1 }">
+        <template #header>
+          <div
+            @dragleave="onDragLeave"
+            @drop="onDropOverTop"
+            @dragover="onDragOverTop"
+            draggable="true"
+            @dragstart="onDragStart"
+            @dragend="onDragEnd"
+            @click="
+              contentStore.setActiveComponent(props.component, 'contentArea')
+            "
+            :id="props.component.id"
+          >
+            <div class="component-header" :style="{borderTop: isDraggingOverTop ? '2px solid var(--p-primary-color)' : 'none'}">
+              <h3
+                v-if="!hasInternalName"
+                class="m-0"
+                style="color: #374151; font-weight: 500; font-size: 1rem"
               >
-                <path
-                  d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </Button>
+                {{ componentDefinition?.name }}
+              </h3>
+              <h3
+                v-else
+                class="m-0"
+                style="color: #374151; font-weight: 500; font-size: 1rem"
+              >
+                {{ componentDefinition?.name }} -
+                {{ props.component.internalName }}
+              </h3>
+              <Button
+                severity="danger"
+                size="small"
+                outlined
+                @click="handleDelete"
+                aria-label="Delete component"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </Button>
+            </div>
           </div>
-        </div>
-      </template>
+        </template>
 
-      <template #content>
-        <div style="padding: 0.1rem">
-          <TextPreview
-            v-if="componentDefinition?.type === 'text'"
-            :component="component"
-          />
-          <ContainerPreview
-            v-if="componentDefinition?.type == 'container'"
-            :component="component"
-          />
-        </div>
-      </template>
-    </Card>
-  </KeepAlive>
+        <template #content>
+          <div style="padding: 0.1rem">
+            <TextPreview
+              v-if="componentDefinition?.type === 'text'"
+              :component="component"
+            />
+            <ContainerPreview
+              v-if="componentDefinition?.type == 'container'"
+              :component="component"
+            />
+            <TabsPreview
+              v-if="componentDefinition?.type === 'tabs'"
+              :component="component"
+            />
+          </div>
+        </template>
+      </Card>
 </template>
 
 <style scoped>
-.drag-above {
-  border-top: 2px solid var(--p-primary-color);
-  background-color: var(--p-primary-color-light);
-}
 
 .component-header {
   display: flex;
@@ -172,5 +179,10 @@ const hideComponent = ref(false);
   border-bottom: 1px solid #e1e5e9;
   margin: -1rem -1rem 0 -1rem;
   padding: 0.75rem 1rem;
+}
+
+.tab-content-only {
+  margin: 0;
+  padding: 0;
 }
 </style>

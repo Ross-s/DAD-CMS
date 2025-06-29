@@ -14,7 +14,7 @@ const componentDefinition = computed(() =>
 );
 
 const hasInternalName = computed(
-  () => !isEmptyOrSpaces(component.value?.internaleName)
+  () => !isEmptyOrSpaces(component.value?.internalName)
 );
 
 const clearActiveComponent = () => {
@@ -33,7 +33,7 @@ const clearActiveComponent = () => {
         </h3>
         <h3 v-if="component !== null && hasInternalName">
           Settings - {{ componentDefinition?.name }} -
-          {{ component?.internaleName }}
+          {{ component?.internalName }}
         </h3>
         <button
           v-if="component !== null"

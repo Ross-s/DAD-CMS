@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-import type { Component, MiniComponentDefinition } from "../ComponentLibrary/components";
+import { isEmptyOrSpaces } from "../../lib/utils";
+import type {
+  Component,
+  MiniComponentDefinition,
+} from "../ComponentLibrary/components";
 import { useContentStore } from "../stores/contentStore";
 
 const props = defineProps<{
@@ -22,20 +26,26 @@ function onDrop(event: DragEvent) {
   event.preventDefault();
   if (event.dataTransfer?.effectAllowed === "copy") {
     const data = event.dataTransfer!.getData("MiniComponentDefinition");
+    if (isEmptyOrSpaces(data)) {
+      return;
+    }
     const component = JSON.parse(data) as MiniComponentDefinition;
     contentStore.addComponent(component, {
-        componentId: props.componentId,
-        insertionPosition: props.numberOfChildren,
-        type: "parent"
+      componentId: props.componentId,
+      insertionPosition: props.numberOfChildren,
+      type: "parent",
     });
   }
 
   if (event.dataTransfer?.effectAllowed !== "copy") {
     const componentId = event.dataTransfer!.getData("ComponentId");
+    if (isEmptyOrSpaces(componentId)) {
+      return;
+    }
     contentStore.moveComponent(componentId, {
-        componentId: props.componentId,
-        insertionPosition: props.numberOfChildren,
-        type: "parent"
+      componentId: props.componentId,
+      insertionPosition: props.numberOfChildren,
+      type: "parent",
     });
   }
 }
